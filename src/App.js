@@ -182,7 +182,7 @@ function App() {
     setPanel(null);
     setSelectedPoint(null);
     try {
-      const response = await axios.post("http://localhost:8000/calculate-trajectories", {
+      const response = await axios.post("https://smartflight.onrender.com/calculate-trajectories", {
         start,
         end
       });
