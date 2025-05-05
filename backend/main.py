@@ -12,7 +12,7 @@ app = FastAPI()
 # CORS sécurisé pour développement et production
 origins = [
     "http://localhost:3000",           # Pour React en local
-    "https://smart-flight-1s5my2637-ikram-serhanes-projects.vercel.app/",
+    "https://smart-flight-1s5my2637-ikram-serhanes-projects.vercel.app",
     "https://smartflight.onrender.com",
 ]
 app.add_middleware(
