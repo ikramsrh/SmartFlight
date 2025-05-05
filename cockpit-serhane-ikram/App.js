@@ -6,7 +6,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <WebView
-        source={{ uri: 'https://smart-flight.vercel.app' }}
+        source={{ uri: 'https://smart-flight-git-main-ikram-serhanes-projects.vercel.app' }}
         style={{ flex: 1 }}
         javaScriptEnabled
         domStorageEnabled
