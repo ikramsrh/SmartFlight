@@ -3,3 +3,8 @@ uvicorn
 requests
 numpy
 pandas
+scikit-learn
+scipy
+pydantic
+python-multipart
+matplotlib
