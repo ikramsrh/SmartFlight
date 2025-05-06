@@ -23,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-OPENWEATHERMAP_API_KEY = "ccd470b5ffad59e89efaaa2906b3250b"
+OPENWEATHERMAP_API_KEY = "ef07f327b1671fc848a76ac2d0fa0c74"
 
 class TrajectoryRequest(BaseModel):
     start: str
