@@ -628,8 +628,8 @@ function App() {
                               : d, 0))
                           : "-"} km
                       </Typography>
-                      <Typography variant="body2">Carburant : {fuel[i]}</Typography>
-                      <Typography variant="body2">Temps : {time[i]}</Typography>
+                      <Typography variant="body2">Carburant : {fuel[i]} L &nbsp;</Typography>
+                      <Typography variant="body2">Temps : {time[i]} min &nbsp;</Typography>
                       <Typography variant="body2">Météo : {getMeteoMoyenne(traj)}</Typography>
                       <Typography variant="body2" sx={{ fontWeight: "bold", mt: 1 }}>
                         {i === recommendation ? "✅ Trajectoire recommandée" : ""}

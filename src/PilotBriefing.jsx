@@ -114,7 +114,7 @@ export default function PilotBriefing({
               <b>Trajectoire :</b> {trajName}
             </Typography>
             <Typography variant="body1">
-              <b>Distance :</b> {distance} km &nbsp; <b>Temps :</b> {time}
+              <b>Distance :</b> {distance} km &nbsp; <b>Temps :</b> {time} min &nbsp;
             </Typography>
             <Typography variant="body1">
               <b>Altitude :</b> {altitude || "FL350"} &nbsp; <b>Direction :</b> {direction}
@@ -141,7 +141,7 @@ export default function PilotBriefing({
           </Box>
           <Divider sx={{ mb: 2 }} />
           <Box sx={{ mb: 2 }}>
-            <Typography variant="body1"><b>Carburant estimé :</b> {fuel}</Typography>
+            <Typography variant="body1"><b>Carburant estimé :</b> {fuel} L &nbsp; </Typography>
             <Typography variant="body1"><b>Score IA :</b> {score}</Typography>
           </Box>
           <Divider sx={{ mb: 2 }} />
