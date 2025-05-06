@@ -5,13 +5,13 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 import math
-import heapq
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+# CORS sécurisé pour développement et production
 origins = [
-    "http://localhost:3000",
+    "http://localhost:3000",           # Pour React en local
     "https://smart-flight-git-main-ikram-serhanes-projects.vercel.app",
     "https://smartflight.onrender.com",
 ]
@@ -93,58 +93,6 @@ def interpolate_points(start, end, n=15):
         for i in range(n)
     ]
 
-# --------- ALGORITHME A* + IA ---------
-def neighbors_fn(point, end, step=0.1):  # Grille fine pour bien séparer les routes
-    lat, lon = point
-    neighbors = []
-    for dlat in [-step, 0, step]:
-        for dlon in [-step, 0, step]:
-            if dlat == 0 and dlon == 0:
-                continue
-            nlat, nlon = lat + dlat, lon + dlon
-            if abs(nlat - end[0]) > 10 or abs(nlon - end[1]) > 10:
-                continue
-            neighbors.append((round(nlat, 4), round(nlon, 4)))
-    return neighbors
-
-def cost_fn(a, b):
-    distance = haversine(a[0], a[1], b[0], b[1])
-    weather = get_weather(b[0], b[1])
-    wind = weather.get("wind", {}).get("speed", 0)
-    precip = weather.get("rain", {}).get("1h", 0) if "rain" in weather else 0
-    score = reg_model.predict(np.array([[distance, wind, precip]]))[0]
-    return distance + score
-
-def heuristic(a, b):
-    return haversine(a[0], a[1], b[0], b[1])
-
-def astar_path(start, end, max_iter=2000):
-    open_set = []
-    heapq.heappush(open_set, (0, start))
-    came_from = {}
-    g_score = {start: 0}
-    iter_count = 0
-
-    while open_set and iter_count < max_iter:
-        _, current = heapq.heappop(open_set)
-        if heuristic(current, end) < 0.5:
-            path = [current]
-            while current in came_from:
-                current = came_from[current]
-                path.append(current)
-            return path[::-1]
-        for neighbor in neighbors_fn(current, end):
-            tentative_g = g_score[current] + cost_fn(current, neighbor)
-            if neighbor not in g_score or tentative_g < g_score[neighbor]:
-                came_from[neighbor] = current
-                g_score[neighbor] = tentative_g
-                f_score = tentative_g + heuristic(neighbor, end)
-                heapq.heappush(open_set, (f_score, neighbor))
-        iter_count += 1
-    return None
-
-# --------- FIN A* + IA ---------
-
 @app.get("/")
 def read_root():
     return {"message": "Backend FastAPI opérationnel avec ML, géocodage dynamique et trajectoires lisses !"}
@@ -153,28 +101,18 @@ def read_root():
 def calculate_trajectories(req: TrajectoryRequest):
     start_coords = get_coords(req.start)
     end_coords = get_coords(req.end)
+
+    mid_lat = (start_coords[0] + end_coords[0]) / 2
+    mid_lon = (start_coords[1] + end_coords[1]) / 2
     n_points = 15
 
-    # Décalage dynamique selon la distance (pour garantir la séparation)
-    distance_total = haversine(start_coords[0], start_coords[1], end_coords[0], end_coords[1])
-    delta = max(2, min(10, distance_total / 10))
-
-    mid = ((start_coords[0]+end_coords[0])/2, (start_coords[1]+end_coords[1])/2)
-    # Nord : +delta sur latitude
-    mid_nord = (mid[0] + delta, mid[1])
-    # Sud : -delta sur latitude
-    mid_sud = (mid[0] - delta, mid[1])
-    waypoints = [mid, mid_nord, mid_sud]
-
-    trajs = []
-    for wp in waypoints:
-        path1 = astar_path(start_coords, wp)
-        path2 = astar_path(wp, end_coords)
-        if path1 and path2:
-            full_path = path1 + path2[1:]
-        else:
-            full_path = interpolate_points(start_coords, end_coords, n_points)
-        trajs.append(full_path)
+    # Génère 3 trajectoires lisses (directe, nord, sud)
+    traj1 = interpolate_points(start_coords, end_coords, n_points)
+    mid_nord = (mid_lat + 2, mid_lon + 2)
+    traj2 = interpolate_points(start_coords, mid_nord, n_points//2)[:-1] + interpolate_points(mid_nord, end_coords, n_points//2)
+    mid_sud = (mid_lat - 2, mid_lon - 2)
+    traj3 = interpolate_points(start_coords, mid_sud, n_points//2)[:-1] + interpolate_points(mid_sud, end_coords, n_points//2)
+    trajs = [traj1, traj2, traj3]
 
     trajs_with_weather = []
     fuel = []
@@ -193,6 +131,7 @@ def calculate_trajectories(req: TrajectoryRequest):
             pressure = weather.get("main", {}).get("pressure", "")
             humidity = weather.get("main", {}).get("humidity", "")
             desc = weather.get("weather", [{}])[0].get("description", "")
+            # --- Détection des risques météo ---
             risk = "none"
             if wind and wind > 30:
                 risk = "turbulence"
@@ -200,6 +139,7 @@ def calculate_trajectories(req: TrajectoryRequest):
                 risk = "storm"
             if "rain" in desc and precip and precip > 5:
                 risk = "storm"
+            # -----------------------------------
             points.append({
                 "lat": lat,
                 "lon": lon,
@@ -222,8 +162,8 @@ def calculate_trajectories(req: TrajectoryRequest):
         avg_precip = total_precip / len(traj)
         score = reg_model.predict(np.array([[total_dist, avg_wind, avg_precip]]))[0]
         scores.append(score)
-        fuel.append({"value": round(total_dist * (1 + avg_wind/100), 2), "unit": "litres"})
-        time.append({"value": round(total_dist / 800 * 60, 2), "unit": "minutes"})
+        fuel.append(round(total_dist * (1 + avg_wind/100), 2))
+        time.append(round(total_dist / 800 * 60, 2))
     best_index = scores.index(min(scores))
     return {
         "trajectories": trajs_with_weather,
