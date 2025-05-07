@@ -1,17 +1,21 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import requests
-import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 import math
 from fastapi.middleware.cors import CORSMiddleware
+from stable_baselines3 import DQN
+import numpy as np
+
+# Charger le modèle RL entraîné au démarrage
+rl_model = DQN.load("dqn_trajectory_realdata.zip")
 
 app = FastAPI()
 
 # CORS sécurisé pour développement et production
 origins = [
-    "http://localhost:3000",           # Pour React en local
+    "http://localhost:3000",
     "https://smart-flight-git-main-ikram-serhanes-projects.vercel.app",
     "https://smartflight.onrender.com",
 ]
@@ -41,7 +45,7 @@ class TrajectoryResponse(BaseModel):
 
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371
-    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    phi1, phi2 = math.radians(lat1), math.radians(lon2)
     dphi = math.radians(lat2 - lat1)
     dlambda = math.radians(lon2 - lon1)
     a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
@@ -118,7 +122,9 @@ def calculate_trajectories(req: TrajectoryRequest):
     fuel = []
     time = []
     scores = []
-    for traj in trajs:
+    traj_features = []  # Pour le RL
+
+    for idx, traj in enumerate(trajs):
         points = []
         total_dist = 0
         total_wind = 0
@@ -154,7 +160,7 @@ def calculate_trajectories(req: TrajectoryRequest):
                 }
             })
             if i > 0:
-                total_dist += haversine(traj[i-1][0], traj[i-1][1], lat, lon)
+                total_dist += haversine(traj[i - 1][0], traj[i - 1][1], lat, lon)
             total_wind += wind
             total_precip += precip
         trajs_with_weather.append(points)
@@ -162,9 +168,18 @@ def calculate_trajectories(req: TrajectoryRequest):
         avg_precip = total_precip / len(traj)
         score = reg_model.predict(np.array([[total_dist, avg_wind, avg_precip]]))[0]
         scores.append(score)
-        fuel.append(round(total_dist * (1 + avg_wind/100), 2))
-        time.append(round(total_dist / 800 * 60, 2))
-    best_index = scores.index(min(scores))
+        fuel_value = round(total_dist * (1 + avg_wind / 100), 2)
+        time_value = round(total_dist / 800 * 60, 2)
+        fuel.append(fuel_value)
+        time.append(time_value)
+        # Ajoute toutes les features utiles pour RL (distance, vent, précip, fuel, time)
+        traj_features.append([total_dist, avg_wind, avg_precip, fuel_value, time_value])
+
+    # Utilisation du modèle RL pour choisir la meilleure trajectoire
+    state = np.array(traj_features, dtype=np.float32)
+    action, _ = rl_model.predict(state, deterministic=True)
+    best_index = int(action)
+
     return {
         "trajectories": trajs_with_weather,
         "fuel": fuel,
