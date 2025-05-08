@@ -20,9 +20,9 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import { motion } from "framer-motion";
 import CalculateIcon from '@mui/icons-material/Calculate';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import PilotBriefing from "./PilotBriefing";
+import Login from "./Login";
+
 
 
 const icons = {
@@ -58,7 +58,8 @@ function getInitialBearing(lat1, lon1, lat2, lon2) {
   return (brng + 360) % 360;
 }
 function App() {
-  // TOUS LES HOOKS EN HAUT
+  // TOUS LES HOOKS
+  const [loggedIn, setLoggedIn] = useState(false);
   const [dynamicRenderMode, setDynamicRenderMode] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [start, setStart] = useState("paris");
@@ -83,6 +84,7 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [actionsVisible, setActionsVisible] = useState(true);
   const viewerRef = useRef();
+
   // Sélectionne la trajectoire recommandée
   const traj = trajectories[recommendation];
   const startP = traj && traj[0];
@@ -129,6 +131,10 @@ function App() {
   };
   useEffect(() => { recenterOnTrajectory(); }, [trajectories, recommendation]);
 
+  //login
+  if (!loggedIn) {
+    return <Login onLogin={() => setLoggedIn(true)} />;
+  }
   // SPLASH EN DEUXIÈME
   if (showSplash) {
     return <VideoSplash onEnter={() => setShowSplash(false)} />;
