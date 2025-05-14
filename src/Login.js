@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Lanyard from "./components/Lanyard";
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -19,13 +20,15 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      width: "100vw",
-      position: "relative",
-      overflow: "hidden",
-      background: "#000"
-    }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        width: "100vw",
+        position: "relative",  // Conteneur relatif pour les absolus enfants
+        overflow: "hidden",
+        background: "#000",
+      }}
+    >
       {/* Fond vidéo plein écran */}
       <video
         autoPlay
@@ -38,35 +41,54 @@ export default function Login({ onLogin }) {
           width: "100vw",
           height: "100vh",
           objectFit: "cover",
-          zIndex: 0
+          zIndex: 0,
         }}
       >
         <source src="/login-bg.mp4" type="video/mp4" />
       </video>
 
-      {/* Formulaire  */}
-      <form onSubmit={handleSubmit} style={{
-        position: "absolute",
-        top: "30%",
-        left: "50%",
-        transform: "translate(-50%, 0)",
-        background: "rgba(255,255,255,0.85)",
-        borderRadius: 16,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 2,
-        boxShadow: "0 4px 32px rgba(0,0,0,0.2)",
-        padding: 24,
-        width: 350,
-        border: "none"
-      }}>
+      {/* Carte 3D - badge */}
+      <div
+        style={{
+          position: "absolute",
+          top: "15%",
+          left: "4%",
+          transform: "translate(-175%, -160%)",
+          zIndex: 2,
+          width: 350,
+          height: 500,
+        }}
+      >
+        <Lanyard />
+      </div>
+
+      {/* Formulaire login */}
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          position: "absolute",
+          top: "52%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          background: "rgba(255,255,255,0.85)",
+          borderRadius: 16,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 32px rgba(0,0,0,0.2)",
+          padding: 24,
+          width: 350,
+          border: "none",
+          zIndex: 3,
+          pointerEvents: "auto",  // pour que le formulaire soit interactif
+        }}
+      >
         <input
           type="text"
           placeholder="Nom d'utilisateur"
           value={username}
-          onChange={e => setUsername(e.target.value)}
+          onChange={(e) => setUsername(e.target.value)}
           required
           style={{
             padding: 10,
@@ -74,14 +96,14 @@ export default function Login({ onLogin }) {
             border: "1px solid #ccc",
             fontSize: "1rem",
             marginBottom: 12,
-            width: "100%"
+            width: "100%",
           }}
         />
         <input
           type="password"
           placeholder="Mot de passe"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           required
           style={{
             padding: 10,
@@ -89,19 +111,29 @@ export default function Login({ onLogin }) {
             border: "1px solid #ccc",
             fontSize: "1rem",
             marginBottom: 12,
-            width: "100%"
+            width: "100%",
           }}
         />
-        <button type="submit" style={{
-          background: "#00cfff",
-          color: "#fff",
-          padding: 10,
-          borderRadius: 8,
-          border: "none",
-          fontWeight: "bold",
-          width: "100%"
-        }}>Se connecter</button>
-        {error && <div style={{color:"red", textAlign:"center", marginTop: 10}}>{error}</div>}
+        <button
+          type="submit"
+          style={{
+            background: "#00cfff",
+            color: "#fff",
+            padding: 10,
+            borderRadius: 8,
+            border: "none",
+            fontWeight: "bold",
+            width: "100%",
+            cursor: "pointer",
+          }}
+        >
+          Se connecter
+        </button>
+        {error && (
+          <div style={{ color: "red", textAlign: "center", marginTop: 10 }}>
+            {error}
+          </div>
+        )}
       </form>
     </div>
   );

@@ -1,0 +1,15 @@
+.lanyard-wrapper {
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+  width: 1500px;
+  height: 2000px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  background: transparent;
+}
+.lanyard-wrapper canvas {
+  pointer-events: none;
+}
