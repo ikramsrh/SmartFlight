@@ -51,12 +51,12 @@ export default function Login({ onLogin }) {
       <div
         style={{
           position: "absolute",
-          top: "15%",
-          left: "4%",
-          transform: "translate(-175%, -160%)",
+          top: "5%",
+          left: "10%",
+          transform: "translate(-85%, -220%)",
           zIndex: 2,
-          width: 350,
-          height: 500,
+          width: 500,
+          height: 100,
         }}
       >
         <Lanyard />
