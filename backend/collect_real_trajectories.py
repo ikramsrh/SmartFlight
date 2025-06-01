@@ -31,7 +31,7 @@ with open("real_trajectory_dataset.csv", "w", newline='', encoding='utf-8') as c
                         fuel = result["fuel"][traj_id]
                         time = result["time"][traj_id]
                         # Le score, tu peux utiliser fuel + time ou autre
-                        score = fuel + time
+                        score = fuel + time + wind * 5 + precip * 2 +distance
                         writer.writerow({
                             "situation_id": situation_id,
                             "trajectory_id": traj_id,

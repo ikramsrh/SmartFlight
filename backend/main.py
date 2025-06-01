@@ -27,7 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-OPENWEATHERMAP_API_KEY = "579c704073fbd113275fd64f590bd7af"
+OPENWEATHERMAP_API_KEY = "fa7d2df5860797f8a2c8597cd2720ba9"
 
 class TrajectoryRequest(BaseModel):
     start: str
@@ -172,7 +172,6 @@ def calculate_trajectories(req: TrajectoryRequest):
         time_value = round(total_dist / 800 * 60, 2)
         fuel.append(fuel_value)
         time.append(time_value)
-        # Ajoute toutes les features utiles pour RL (distance, vent, précip, fuel, time)
         traj_features.append([total_dist, avg_wind, avg_precip, fuel_value, time_value])
 
     # Utilisation du modèle RL pour choisir la meilleure trajectoire
