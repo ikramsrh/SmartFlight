@@ -22,9 +22,7 @@ import { motion } from "framer-motion";
 import CalculateIcon from '@mui/icons-material/Calculate';
 import PilotBriefing from "./PilotBriefing";
 import Login from "./Login";
-
-
-
+import VoiceBriefing from "./VoiceBriefing";
 const icons = {
   storm: "https://cdn-icons-png.flaticon.com/512/1146/1146869.png",
   turbulence: "https://cdn-icons-png.flaticon.com/512/2086/2086737.png",
@@ -319,6 +317,16 @@ function App() {
             >
               Masquer les actions
             </Button>
+            <VoiceBriefing
+             trajName={TRAJ_NAMES[recommendation]}
+             meteo={getMeteoMoyenne(trajectories[recommendation])}
+             distance={distance}
+             fuel={fuel[recommendation]}
+             altitude={altitude}
+             start={start}
+             end={end}
+             direction={direction}
+            />
           </div>
           <form
             onSubmit={handleCalculate}
